@@ -1,4 +1,6 @@
 snake
 =====
 
-Restaurant project for Odin Project. For details, see [Project: jQuery and the DOM](http://www.theodinproject.com/javascript-and-jquery/jquery-and-the-dom)
+Restaurant project for Odin Project. Week 3 exercise: http://codesydney.com/schedule/
+
+For details, see [Project: jQuery and the DOM](http://www.theodinproject.com/javascript-and-jquery/jquery-and-the-dom)
