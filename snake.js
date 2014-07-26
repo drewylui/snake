@@ -66,32 +66,42 @@ function renderGrid (inputString, parentDiv) {
 }
 
 
-// render the snake in a new position
+// moves the snake in the current direction, until it moves off the end of the board
+var counter = 0;
 function move () {
 
-	setLocation(snakeObj.currPos,false);
+	setTimeout(function(){
+		if ((snakeObj.currPos[0]>=0) && (snakeObj.currPos[0]<=39) && (snakeObj.currPos[1]>=0) && (snakeObj.currPos[1]<=39)) {
+			setLocation(snakeObj.currPos,false);
 
-	if (snakeObj.direction === "l") {
-		snakeObj.currPos[1]--;
-	}
-	else if (snakeObj.direction === "u") {
-		snakeObj.currPos[0]--;
-	}
-	else if (snakeObj.direction === "r") {
-		snakeObj.currPos[1]++;
-	}
-	else if (snakeObj.direction === "d") {
-		snakeObj.currPos[0]++;
-	}	
-	else {
-		console.log("Unrecognised direction")
-	}
+			if (snakeObj.direction === "l") {
+				snakeObj.currPos[1]--;
+			}
+			else if (snakeObj.direction === "u") {
+				snakeObj.currPos[0]--;
+			}
+			else if (snakeObj.direction === "r") {
+				snakeObj.currPos[1]++;
+			}
+			else if (snakeObj.direction === "d") {
+				snakeObj.currPos[0]++;
+			}	
+			else {
+				console.log("Unrecognised direction")
+			}
 
-	setLocation(snakeObj.currPos,true);
+			setLocation(snakeObj.currPos,true);
+
+			move(); // loop
+		}
+		else {
+			alert("GAME OVER");
+		}
+	}, 200)
 
 }
 
-// 
+// draw snake (or no snake) at specified location
 
 function setLocation (location, snakeToggle) {
 	var locationID = "#" + location[0] + "x" + location[1];
@@ -110,12 +120,16 @@ $(document).ready(function() {
 	renderGrid (" ","#grid");
 
 	$("html").on('keydown',function(event) {
-		if ((event.keyCode===37) || (event.keyCode===38) || (event.keyCode===39) || (event.keyCode===40))  {
+		// if arrow keys are pressed, change snake's direction		
+		if ((event.keyCode===37) || (event.keyCode===38) || (event.keyCode===39) || (event.keyCode===40))  {	
 			snakeObj.direction = keyCodes[event.keyCode];
-			move();
 			console.log(snakeObj.direction);
 			console.log(snakeObj.currPos);
 			return false;
+		}
+		else if (event.keyCode===13) {
+			console.log("go");
+			move();						
 		}
 		else {
 			console.log("Invalid input");
