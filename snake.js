@@ -1,10 +1,13 @@
+var gridLength = 1;
+var gridHeight = 1;
+
 /* Builds a grid object of strings based on the input string, length and height parameters passed to it
 	gridObj = {
 		row1: ["string", "string", "string"]
 		row2: {}
 	}
 */
-function buildGrid (gridLength, gridHeight, inputString) {
+function buildGrid (inputString) {
 	var gridObj = {};
 	var gridRow = [];
 	var rowKey = "";
@@ -23,13 +26,13 @@ function buildGrid (gridLength, gridHeight, inputString) {
 }
 
 // Creates a grid of divs on the page, based on a JS object. Appends it to the parent div specified.
-function renderGrid (gridLength, gridHeight, inputString, parentDiv) {
+function renderGrid (inputString, parentDiv) {
 	var gridMarkup = "";
 	var rowDiv = "";
 	var rowNum = 0;
 	var cellID = ""; 
 
-	gridObj = buildGrid (gridLength, gridHeight, inputString); // build a JS object with grid data
+	gridObj = buildGrid (inputString); // build a JS object with grid data
 
 	for (var row in gridObj) {		
 		rowDiv = "<div class='row'>"
@@ -45,12 +48,20 @@ function renderGrid (gridLength, gridHeight, inputString, parentDiv) {
 
 	$(parentDiv).append(gridMarkup);
 
+	setHeadLocation(20,20);
+
+}
+
+function setHeadLocation (x,y) {
+	var location = "#" + x + "," + y;
+	console.log(location);
 }
 
 
-
 $(document).ready(function() {	
-	
-	renderGrid (3,4," ","#content");
+	gridLength = 40;
+	gridHeight = 40;
+
+	renderGrid (" ","#grid");
 
 })
