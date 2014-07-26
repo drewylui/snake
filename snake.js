@@ -1,11 +1,11 @@
 var gridLength = 1;
 var gridHeight = 1;
-
 var snakeObj = {
 	"startPos": [20,20],
 	"currPos": [20,20],
 	"direction": "r"
 };
+var food = [0,0];
 var keyCodes = {
 	"37": "l",
 	"38": "u",
@@ -62,7 +62,12 @@ function renderGrid (inputString, parentDiv) {
 
 	$(parentDiv).append(gridMarkup);
 
-	setLocation(snakeObj.startPos, true);
+	setLocation(snakeObj.startPos, "O");
+	food[0] = Math.floor(Math.random()*39);
+	food[1] = Math.floor(Math.random()*39);
+	setLocation(food,"X");
+	console.log(food);
+
 }
 
 
@@ -72,7 +77,7 @@ function move () {
 
 	setTimeout(function(){
 		if ((snakeObj.currPos[0]>=0) && (snakeObj.currPos[0]<=39) && (snakeObj.currPos[1]>=0) && (snakeObj.currPos[1]<=39)) {
-			setLocation(snakeObj.currPos,false);
+			setLocation(snakeObj.currPos," ");
 
 			if (snakeObj.direction === "l") {
 				snakeObj.currPos[1]--;
@@ -90,7 +95,11 @@ function move () {
 				console.log("Unrecognised direction")
 			}
 
-			setLocation(snakeObj.currPos,true);
+			setLocation(snakeObj.currPos,"O");
+
+			if ((snakeObj.currPos[0] === food[0]) && (snakeObj.currPos[1] === food[1])) {
+				console.log("nomnomnon");
+			}
 
 			move(); // loop
 		}
@@ -101,16 +110,11 @@ function move () {
 
 }
 
-// draw snake (or no snake) at specified location
+// draw character at specified location (array)
 
-function setLocation (location, snakeToggle) {
+function setLocation (location, character) {
 	var locationID = "#" + location[0] + "x" + location[1];
-	if (snakeToggle === true) {
-		$(locationID).text("O");				
-	}
-	else {
-		$(locationID).text(" ");
-	}	
+	$(locationID).text(character);				
 }
 
 $(document).ready(function() {	
