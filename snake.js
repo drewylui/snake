@@ -62,14 +62,46 @@ function renderGrid (inputString, parentDiv) {
 
 	$(parentDiv).append(gridMarkup);
 
-	setLocation(snakeObj.startPos);
+	setLocation(snakeObj.startPos, true);
 }
 
-function setLocation (location) {
+
+// render the snake in a new position
+function move () {
+
+	setLocation(snakeObj.currPos,false);
+
+	if (snakeObj.direction === "l") {
+		snakeObj.currPos[1]--;
+	}
+	else if (snakeObj.direction === "u") {
+		snakeObj.currPos[0]--;
+	}
+	else if (snakeObj.direction === "r") {
+		snakeObj.currPos[1]++;
+	}
+	else if (snakeObj.direction === "d") {
+		snakeObj.currPos[0]++;
+	}	
+	else {
+		console.log("Unrecognised direction")
+	}
+
+	setLocation(snakeObj.currPos,true);
+
+}
+
+// 
+
+function setLocation (location, snakeToggle) {
 	var locationID = "#" + location[0] + "x" + location[1];
-	$(locationID).text("O");			
+	if (snakeToggle === true) {
+		$(locationID).text("O");				
+	}
+	else {
+		$(locationID).text(" ");
+	}	
 }
-
 
 $(document).ready(function() {	
 	gridLength = 40;
@@ -80,7 +112,9 @@ $(document).ready(function() {
 	$("html").on('keydown',function(event) {
 		if ((event.keyCode===37) || (event.keyCode===38) || (event.keyCode===39) || (event.keyCode===40))  {
 			snakeObj.direction = keyCodes[event.keyCode];
+			move();
 			console.log(snakeObj.direction);
+			console.log(snakeObj.currPos);
 			return false;
 		}
 		else {
