@@ -3,7 +3,9 @@ var gridHeight = 1;
 var snakeObj = {
 	"startPos": [20,20],
 	"currPos": [20,20],
-	"direction": "r"
+	"body": [[20,20],[20,19]],
+	"direction": "r",
+	"size": 1
 };
 var food = [0,0];
 var keyCodes = {
@@ -72,33 +74,43 @@ function renderGrid (inputString, parentDiv) {
 
 
 // moves the snake in the current direction, until it moves off the end of the board
-var counter = 0;
 function move () {
 
 	setTimeout(function(){
-		if ((snakeObj.currPos[0]>=0) && (snakeObj.currPos[0]<=39) && (snakeObj.currPos[1]>=0) && (snakeObj.currPos[1]<=39)) {
-			setLocation(snakeObj.currPos," ");
+		if ((snakeObj.body[0][0]>=0) && (snakeObj.body[0][0]<=39) && (snakeObj.body[0][1]>=0) && (snakeObj.body[0][1]<=39)) {
+			
+			var tail = snakeObj.body.length-1;
+			setLocation(snakeObj.body[tail]," ");
 
 			if (snakeObj.direction === "l") {
-				snakeObj.currPos[1]--;
+				for (i=0;i<snakeObj.body.length;i++) {
+					snakeObj.body[i][1]--;	
+				}
 			}
 			else if (snakeObj.direction === "u") {
-				snakeObj.currPos[0]--;
+				for (i=0;i<snakeObj.body.length;i++) {
+					snakeObj.body[i][0]--;	
+				}				
 			}
 			else if (snakeObj.direction === "r") {
-				snakeObj.currPos[1]++;
+				for (i=0;i<snakeObj.body.length;i++) {
+					snakeObj.body[i][1]++;	
+				}				
 			}
 			else if (snakeObj.direction === "d") {
-				snakeObj.currPos[0]++;
+				for (i=0;i<snakeObj.body.length;i++) {
+					snakeObj.body[i][0]++;	
+				}				
 			}	
 			else {
 				console.log("Unrecognised direction")
 			}
 
-			setLocation(snakeObj.currPos,"O");
+			setLocation(snakeObj.body[0],"O");
 
-			if ((snakeObj.currPos[0] === food[0]) && (snakeObj.currPos[1] === food[1])) {
+			if ((snakeObj.body[0][0] === food[0]) && (snakeObj.body[0][1] === food[1])) {
 				console.log("nomnomnon");
+				// growSnake();
 			}
 
 			move(); // loop
@@ -106,17 +118,46 @@ function move () {
 		else {
 			alert("GAME OVER");
 		}
+
 	}, 200)
 
 }
 
 // draw character at specified location (array)
-
 function setLocation (location, character) {
 	var locationID = "#" + location[0] + "x" + location[1];
-	$(locationID).text(character);				
+	$(locationID).text(character);			
 }
 
+function growSnake () {
+	var bodyPosStr = "bodyPos" + String(snakeObj.size); // omit the startpos and direction properties
+	var tail = snakeObj.body[snakeObj.size];
+	console.log(tail);
+
+	if (snakeObj.direction === "l") {
+		tail = [tail[0],tail[1]+1];
+	}
+	else if (snakeObj.direction === "u") {
+		tail = [tail[0]+1,tail[1]];
+	}
+	else if (snakeObj.direction === "r") {
+		tail = [tail[0],tail[1]-1];
+	}
+	else if (snakeObj.direction === "d") {
+		tail = [tail[0]-1,tail[1]];
+	}
+	else {
+		console.log("Invalid direction");
+	}
+	
+	snakeObj.body.push(tail);
+
+	snakeObj.size++;
+	console.log(snakeObj);	
+}
+
+
+// main function
 $(document).ready(function() {	
 	gridLength = 40;
 	gridHeight = 40;
@@ -128,7 +169,7 @@ $(document).ready(function() {
 		if ((event.keyCode===37) || (event.keyCode===38) || (event.keyCode===39) || (event.keyCode===40))  {	
 			snakeObj.direction = keyCodes[event.keyCode];
 			console.log(snakeObj.direction);
-			console.log(snakeObj.currPos);
+			console.log(snakeObj.body[0]);
 			return false;
 		}
 		else if (event.keyCode===13) {
