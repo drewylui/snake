@@ -2,8 +2,7 @@ var gridLength = 1;
 var gridHeight = 1;
 var snakeObj = {
 	"startPos": [20,20],
-	"currPos": [20,20],
-	"body": [[20,20],[20,19]],
+	"body": [[20,20]],
 	"direction": "r",
 	"size": 1
 };
@@ -14,6 +13,8 @@ var keyCodes = {
 	"39": "r",
 	"40": "d"
 }
+var speed = 200;
+var timeoutId;
 
 
 /* Builds a grid object of strings based on the input string, length and height parameters passed to it
@@ -65,62 +66,83 @@ function renderGrid (inputString, parentDiv) {
 	$(parentDiv).append(gridMarkup);
 
 	setLocation(snakeObj.startPos, "O");
+	placeFood();
+	console.log("Food: " + food);
+}
+
+function placeFood() {
 	food[0] = Math.floor(Math.random()*39);
 	food[1] = Math.floor(Math.random()*39);
 	setLocation(food,"X");
-	console.log(food);
-
 }
-
 
 // moves the snake in the current direction, until it moves off the end of the board
 function move () {
 
-	setTimeout(function(){
+	timeoutId = setTimeout(function(){
+		// proceed if an arrow key is pressed
 		if ((snakeObj.body[0][0]>=0) && (snakeObj.body[0][0]<=39) && (snakeObj.body[0][1]>=0) && (snakeObj.body[0][1]<=39)) {
 			
-			var tail = snakeObj.body.length-1;
-			setLocation(snakeObj.body[tail]," ");
+			var tailPos = snakeObj.body.length-1;
 
+			setLocation(snakeObj.body[snakeObj.body.length-1]," "); // erase the current position of the tail
+
+			// move every body cell to the position of the body cell in front of it
+			for (i=snakeObj.body.length-1; i>0; i--) {
+				snakeObj.body[i][0] = snakeObj.body[i-1][0];	
+				snakeObj.body[i][1] = snakeObj.body[i-1][1];	
+			}
+
+			// move the head to a new position
 			if (snakeObj.direction === "l") {
-				for (i=0;i<snakeObj.body.length;i++) {
-					snakeObj.body[i][1]--;	
-				}
+				snakeObj.body[0][1]--;	
 			}
 			else if (snakeObj.direction === "u") {
-				for (i=0;i<snakeObj.body.length;i++) {
-					snakeObj.body[i][0]--;	
-				}				
+				snakeObj.body[0][0]--;	
+
 			}
 			else if (snakeObj.direction === "r") {
-				for (i=0;i<snakeObj.body.length;i++) {
-					snakeObj.body[i][1]++;	
-				}				
+				snakeObj.body[0][1]++;	
 			}
 			else if (snakeObj.direction === "d") {
-				for (i=0;i<snakeObj.body.length;i++) {
-					snakeObj.body[i][0]++;	
-				}				
+				snakeObj.body[0][0]++;	
 			}	
 			else {
 				console.log("Unrecognised direction")
 			}
 
+			// check if snake has eaten food. if so, grow the body by one.
+			if ((snakeObj.body[0][0] === food[0]) && (snakeObj.body[0][1] === food[1])) {
+				console.log("nomnomnon " + snakeObj.body[0][0] + "," + snakeObj.body[0][1]);
+				console.log("oldsnake: ")
+				console.log(snakeObj.body[0] + " | " + snakeObj.body[1] + " | " + snakeObj.body[2]);
+				growSnake();
+				placeFood();
+				console.log("newsnake: ")
+				console.log(snakeObj.body[0] + " | " + snakeObj.body[1] + " | " + snakeObj.body[2]);
+			}
+			
+			// draw the head in its new position
 			setLocation(snakeObj.body[0],"O");
 
-			if ((snakeObj.body[0][0] === food[0]) && (snakeObj.body[0][1] === food[1])) {
-				console.log("nomnomnon");
-				// growSnake();
+			if (checkCollision() === true) {
+				clearTimeout(timeoutId);
+				alert("GAME OVER");
 			}
 
 			move(); // loop
 		}
 		else {
-			alert("GAME OVER");
+			clearTimeout(timeoutId);
+			alert("GAME OVER");			
 		}
 
-	}, 200)
+	}, speed)
 
+}
+
+function stopTimeout() {
+	clearTimeout(timeoutId);
 }
 
 // draw character at specified location (array)
@@ -129,33 +151,56 @@ function setLocation (location, character) {
 	$(locationID).text(character);			
 }
 
+// add a cell to the snake
 function growSnake () {
-	var bodyPosStr = "bodyPos" + String(snakeObj.size); // omit the startpos and direction properties
-	var tail = snakeObj.body[snakeObj.size];
-	console.log(tail);
+	var bodyPosStr = "bodyPos" + String(snakeObj.body.length); // omit the startpos and direction properties
+	var tail = snakeObj.body[snakeObj.body.length-1];
+	var newtail = [];
 
 	if (snakeObj.direction === "l") {
-		tail = [tail[0],tail[1]+1];
+		newtail = [tail[0],tail[1]+1];
 	}
 	else if (snakeObj.direction === "u") {
-		tail = [tail[0]+1,tail[1]];
+		newtail = [tail[0]+1,tail[1]];
 	}
 	else if (snakeObj.direction === "r") {
-		tail = [tail[0],tail[1]-1];
+		newtail = [tail[0],tail[1]-1];
 	}
 	else if (snakeObj.direction === "d") {
-		tail = [tail[0]-1,tail[1]];
+		newtail = [tail[0]-1,tail[1]];
 	}
 	else {
 		console.log("Invalid direction");
 	}
-	
-	snakeObj.body.push(tail);
 
-	snakeObj.size++;
-	console.log(snakeObj);	
+	console.log("new tail:");
+	console.log(newtail);	
+	
+	snakeObj.body.push(newtail);
 }
 
+// returns true, if the snake head has hit any of the body cells
+function checkCollision () { 	
+	var	tail = snakeObj.body.slice(1,snakeObj.body.length); // get the body minus the head
+	var tailStr = tail.join("|");
+	var headStr = snakeObj.body[0].toString();
+
+	console.log("headStr: " + headStr + " | " + "tailStr: " + tailStr);
+
+	if (snakeObj.body.length > 1) { // only check if the snake is longer than 1 cell
+		console.log("indexOf:" + tailStr.indexOf(headStr));
+		if (tailStr.indexOf(headStr) === -1) {
+			return false; // head not found in a body cell location
+		}
+		else {
+			return true; // head found in a body cell location
+			console.log("bingo")
+		}
+	}
+	else {
+		return false;
+	}
+}
 
 // main function
 $(document).ready(function() {	
@@ -165,17 +210,47 @@ $(document).ready(function() {
 	renderGrid (" ","#grid");
 
 	$("html").on('keydown',function(event) {
-		// if arrow keys are pressed, change snake's direction		
-		if ((event.keyCode===37) || (event.keyCode===38) || (event.keyCode===39) || (event.keyCode===40))  {	
-			snakeObj.direction = keyCodes[event.keyCode];
-			console.log(snakeObj.direction);
-			console.log(snakeObj.body[0]);
+		// if arrow keys are pressed, change snake's direction, but don't let the snake change to the opposite direction	
+		console.log(event.keyCode);	
+		if (event.keyCode===37) { // turn left
+			if (snakeObj.direction!="r") { 
+				snakeObj.direction = keyCodes[event.keyCode];
+			}
 			return false;
 		}
+		else if (event.keyCode===38) { // turn up
+			if (snakeObj.direction!="d") { 
+				snakeObj.direction = keyCodes[event.keyCode];
+			}
+			return false;
+		} 
+		else if (event.keyCode===39) { // turn right
+			if (snakeObj.direction!="l") { 
+				snakeObj.direction = keyCodes[event.keyCode];
+			}
+			return false;
+		}
+		else if (event.keyCode===40)  { // turn down
+			if (snakeObj.direction!="u") { 
+				snakeObj.direction = keyCodes[event.keyCode];
+			}
+			return false;
+		}		
+		// press '-' or '=' to decrease/increase speed of snake
+		else if (event.keyCode===187) {
+			if ((speed-100) > 0) {
+				speed = speed-100;
+			}		
+		}	
+		else if (event.keyCode===189) {
+			speed = speed+100;			
+		}		
+		// start the snake game						
 		else if (event.keyCode===13) {
 			console.log("go");
-			move();						
-		}
+			move();		
+			return false;			
+		}		
 		else {
 			console.log("Invalid input");
 		}		
