@@ -1,9 +1,24 @@
+#header {
+	clear:left;
+	text-align: center;
+	font-size: 24px;
+	font-family: Verdana;
+	padding: 2px;
+}
+#instructions {
+	clear:left;
+	text-align: center;
+	font-size: 12px;
+	font-family: Verdana;
+	padding: 3px;
+}
 .cell {
 	float: left;
 	border: 1px solid black;
 	width: 22px;
 	height: 22px;	
 	text-align: center;
+	background: #FAFAFA;
 }
 
 .row {

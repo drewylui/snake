@@ -3,8 +3,7 @@ var gridHeight = 1;
 var snakeObj = {
 	"startPos": [20,20],
 	"body": [[20,20]],
-	"direction": "r",
-	"size": 1
+	"direction": "r"
 };
 var food = [0,0];
 var keyCodes = {
@@ -15,6 +14,9 @@ var keyCodes = {
 }
 var speed = 200;
 var timeoutId;
+var score = 0;
+var foodPoints = 10;
+var gameOver = false;
 
 
 /* Builds a grid object of strings based on the input string, length and height parameters passed to it
@@ -67,7 +69,6 @@ function renderGrid (inputString, parentDiv) {
 
 	setLocation(snakeObj.startPos, "O");
 	placeFood();
-	console.log("Food: " + food);
 }
 
 function placeFood() {
@@ -80,10 +81,9 @@ function placeFood() {
 function move () {
 
 	timeoutId = setTimeout(function(){
+		console.log("snake: " + snakeObj.body[0][0] + "," + snakeObj.body[0][1]);
 		// proceed if an arrow key is pressed
-		if ((snakeObj.body[0][0]>=0) && (snakeObj.body[0][0]<=39) && (snakeObj.body[0][1]>=0) && (snakeObj.body[0][1]<=39)) {
-			
-			var tailPos = snakeObj.body.length-1;
+		if ((snakeObj.body[0][0]>=0) && (snakeObj.body[0][0]<=39) && (snakeObj.body[0][1]>=0) && (snakeObj.body[0][1]<=39)) {		
 
 			setLocation(snakeObj.body[snakeObj.body.length-1]," "); // erase the current position of the tail
 
@@ -113,28 +113,32 @@ function move () {
 
 			// check if snake has eaten food. if so, grow the body by one.
 			if ((snakeObj.body[0][0] === food[0]) && (snakeObj.body[0][1] === food[1])) {
-				console.log("nomnomnon " + snakeObj.body[0][0] + "," + snakeObj.body[0][1]);
-				console.log("oldsnake: ")
-				console.log(snakeObj.body[0] + " | " + snakeObj.body[1] + " | " + snakeObj.body[2]);
 				growSnake();
 				placeFood();
-				console.log("newsnake: ")
-				console.log(snakeObj.body[0] + " | " + snakeObj.body[1] + " | " + snakeObj.body[2]);
+				score = score + foodPoints;
+				foodPoints = foodPoints + 10;
+				$("#instructions").text("Score: " + score);
 			}
 			
 			// draw the head in its new position
 			setLocation(snakeObj.body[0],"O");
 
+			// check for a collision, if no collision then keep going
 			if (checkCollision() === true) {
 				clearTimeout(timeoutId);
-				alert("GAME OVER");
+				$("#instructions").text("GAME OVER! Your final score is: " + score + ". Press Escape to start again.");
+				$("#instructions").css("color","red");
+				gameOver = true;
 			}
-
-			move(); // loop
+			else {
+				move(); // loop
+			}
 		}
 		else {
 			clearTimeout(timeoutId);
-			alert("GAME OVER");			
+			$("#instructions").text("GAME OVER! Your final score is: " + score + ". Press Escape to start again.");
+			$("#instructions").css("color","red");	
+			gameOver = true;
 		}
 
 	}, speed)
@@ -172,9 +176,6 @@ function growSnake () {
 	else {
 		console.log("Invalid direction");
 	}
-
-	console.log("new tail:");
-	console.log(newtail);	
 	
 	snakeObj.body.push(newtail);
 }
@@ -241,16 +242,37 @@ $(document).ready(function() {
 			if ((speed-100) > 0) {
 				speed = speed-100;
 			}		
+			return false;	
 		}	
 		else if (event.keyCode===189) {
 			speed = speed+100;			
+			return false;	
 		}		
-		// start the snake game						
+		// press Enter to start the snake game						
 		else if (event.keyCode===13) {
-			console.log("go");
+			$("#instructions").text("Score: " + score);
+			$("#instructions").css("font-size","18px");
+			$("#instructions").css("color","black");			
 			move();		
 			return false;			
 		}		
+		// press Escape to reset the game, if it has ended
+		else if (event.keyCode===27) {
+			if (gameOver === true) { 
+				$("#grid").empty();
+				renderGrid (" ","#grid");
+				snakeObj.startPos = [20,20];
+				snakeObj.body = [[20,20]];
+				snakeObj.direction = "r";
+				score = 0;
+				foodPoints = 10;
+				$("#instructions").text("Score: " + score);
+				$("#instructions").css("font-size","18px");
+				$("#instructions").css("color","black");
+				gameOver = false;
+			}	
+			return false;	
+		}	
 		else {
 			console.log("Invalid input");
 		}		
