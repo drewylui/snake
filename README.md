@@ -1,7 +1,7 @@
 snake
 =====
 
-**Deprecated in favour of this repository: [code-sydney repository] (https://github.com/drewylui/code-sydney)**
+**Deprecated in favour of this repository: [code-sydney repository](https://github.com/drewylui/code-sydney)**
 
 Snake project for Odin Project. Week 3 exercise: http://codesydney.com/schedule/
 
